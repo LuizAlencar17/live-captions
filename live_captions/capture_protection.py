@@ -24,7 +24,7 @@ class ProtectionResult:
 def exclude_window_from_capture(widget: QWidget) -> ProtectionResult:
     """Protect a top-level window with the official Windows API."""
     if sys.platform != "win32":
-        return ProtectionResult(False, False, "Capture protection is available only on Windows")
+        return ProtectionResult(False, False, "Screen-capture protection is unavailable on Linux")
 
     hwnd = int(widget.winId())
     user32 = ctypes.WinDLL("user32", use_last_error=True)

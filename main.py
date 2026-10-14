@@ -14,7 +14,7 @@ def main() -> int:
     app.setApplicationName("Live Captions")
     app.setOrganizationName("Local")
     app.setStyle("Fusion")
-    app.setFont(QFont("Segoe UI Variable", 10))
+    app.setFont(QFont("Sans Serif", 10))
 
     try:
         settings = load_settings()

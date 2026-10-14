@@ -7,18 +7,18 @@ Uma aplicação desktop moderna de **legendas em tempo real** para o áudio do c
 ## ✨ Principais Funcionalidades
 
 - **🔊 Captura de Áudio Interno (Loopback)**:
-  - Captura o áudio emitido pelo computador usando **WASAPI Loopback** (via biblioteca `SoundCard`), sem necessidade de microfones externos ou cabos de áudio virtuais.
+  - Captura o áudio emitido pelo computador usando a biblioteca `SoundCard` (WASAPI no Windows; PulseAudio ou PipeWire com compatibilidade PulseAudio no Linux), sem necessidade de microfones externos ou cabos de áudio virtuais.
 
 - **🤖 Motores de Transcrição Flexíveis**:
   - **Deepgram (Nuvem)**: Transcrição em tempo real ultra-rápida de baixa latência usando o modelo `nova-3` via WebSocket com suporte a resultados parciais (*interim results*).
   - **OpenAI Whisper (Local/Offline)**: Processamento 100% local no próprio computador, ideal para privacidade total ou uso offline, com janelas deslizantes e algoritmo de remoção de sobreposição (*overlap deduplication*).
 
 - **🛡️ Proteção de Privacidade contra Captura de Tela**:
-  - Utiliza a API nativa do Windows (`SetWindowDisplayAffinity` com `WDA_EXCLUDEFROMCAPTURE`) para **esconder a janela de legendas** de compartilhamentos de tela e gravadores (OBS, Discord, Zoom, Teams, Google Meet, etc.).
+  - No Windows, utiliza a API nativa (`SetWindowDisplayAffinity` com `WDA_EXCLUDEFROMCAPTURE`) para **esconder a janela de legendas** de compartilhamentos de tela e gravadores (OBS, Discord, Zoom, Teams, Google Meet, etc.). Essa proteção não está disponível no Linux; a janela poderá aparecer em capturas de tela e compartilhamentos.
 
 - **🎨 Interface Flutuante e Moderna (PySide6 / Qt)**:
   - Janela sem bordas (*frameless*), translúcida (*dark glassmorphism*), *Always on Top* (sempre no topo), redimensionável e arrastável.
-  - Indicador de status de conexão, privacidade e botão de cópia rápida para a área de transferência via Win32 API direta.
+  - Indicador de status de conexão e privacidade, além de cópia rápida para a área de transferência usando a API nativa de cada plataforma.
 
 - **🌐 Suporte a Múltiplos Idiomas**:
   - Suporte pré-configurado para Português (PT-BR / pt) e Inglês (EN-US / en).
@@ -35,9 +35,9 @@ Uma aplicação desktop moderna de **legendas em tempo real** para o áudio do c
 ├── models/                        # Diretório para modelos locais (ex: small.pt do Whisper)
 └── live_captions/
     ├── __init__.py                # Metadados e versão do pacote
-    ├── audio.py                   # Captura de áudio de saída do Windows (WASAPI Loopback)
-    ├── capture_protection.py      # Integração Win32 para ocultar a janela de capturas de tela
-    ├── clipboard.py               # Cópia segura para clipboard via ctypes/Win32 sem travar a thread
+    ├── audio.py                   # Captura de áudio de saída e microfone
+    ├── capture_protection.py      # Proteção de captura de tela (disponível apenas no Windows)
+    ├── clipboard.py               # Cópia para a área de transferência
     ├── config.py                  # Carregamento de variáveis de ambiente (.env) e configurações
     ├── deepgram.py                # Thread de transcrição contínua via WebSocket da Deepgram
     ├── transcript.py              # Buffer de transcrição (gerencia texto final e texto intermediário)
@@ -50,22 +50,34 @@ Uma aplicação desktop moderna de **legendas em tempo real** para o áudio do c
 ## ⚙️ Pré-requisitos e Instalação
 
 ### 1. Requisitos
-- **Sistema Operacional**: Windows 10/11 (recomendado para suporte a WASAPI Loopback e proteção de tela).
+- **Sistema Operacional**: Windows 10/11 ou Linux desktop. A captura do áudio do sistema no Linux requer PulseAudio ou PipeWire com `pipewire-pulse`; a proteção contra captura de tela só funciona no Windows.
 - **Python**: versão 3.10 ou superior.
+
+No Ubuntu/Debian, instale os pré-requisitos do sistema e, se usar PipeWire, habilite a compatibilidade PulseAudio:
+
+```bash
+sudo apt update
+sudo apt install python3 python3-venv python3-pip ffmpeg libpulse0
+# Para PipeWire, instale/ative também o pacote pipewire-pulse da sua distribuição.
+```
+
+Se `python3 -m venv` informar que `ensurepip` não está disponível, instale o pacote correspondente à versão do Python (por exemplo, `sudo apt install python3.12-venv`) e crie o ambiente virtual novamente.
 
 ### 2. Instalação das Dependências
 
-Crie e ative um ambiente virtual (opcional, porém recomendado):
+Crie e ative um ambiente virtual (recomendado):
 
 ```bash
-python -m venv venv
-venv\Scripts\activate  # No Windows
+python3 -m venv .venv
+source .venv/bin/activate  # Linux
+# Windows PowerShell: .venv\Scripts\Activate.ps1
 ```
 
 Instale os pacotes necessários:
 
 ```bash
-pip install -r requirements.txt
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
 ```
 
 ---
@@ -94,6 +106,8 @@ Execute o arquivo principal:
 ```bash
 python main.py
 ```
+
+No Linux, se o áudio do computador não for encontrado, confirme que o servidor PulseAudio está ativo ou que `pipewire-pulse` está instalado e em execução. O modo **Mic** pode ser usado para verificar a captura do microfone independentemente do monitor de saída.
 
 ---
 

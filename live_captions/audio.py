@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import enum
 import queue
+import sys
 import threading
 from collections.abc import Sequence
 
@@ -88,7 +89,12 @@ def _find_loopback(sample_rate: int | None = None) -> sc.Microphone:
 
     if candidates:
         return candidates[0]
-    raise RuntimeError("The WASAPI loopback device was not found.")
+    if sys.platform.startswith("linux"):
+        raise RuntimeError(
+            "No system-audio monitor was found. On Linux, enable PulseAudio or "
+            "PipeWire's pipewire-pulse compatibility server."
+        )
+    raise RuntimeError("No system-audio loopback device was found.")
 
 
 def _samples_to_mono_pcm(samples: np.ndarray) -> tuple[np.ndarray, bytes]:
@@ -106,7 +112,7 @@ def _samples_to_mono_pcm(samples: np.ndarray) -> tuple[np.ndarray, bytes]:
 # ---------------------------------------------------------------------------
 
 class LoopbackAudioCapture:
-    """Capture the default output device through WASAPI loopback."""
+    """Capture the default system output using the platform audio backend."""
 
     def __init__(self, sample_rate: int, frames_per_chunk: int) -> None:
         self.sample_rate = sample_rate
@@ -121,7 +127,7 @@ class LoopbackAudioCapture:
         self._stop_event.clear()
         self._thread = threading.Thread(
             target=self._capture_loop,
-            name="wasapi-loopback",
+            name="system-audio-loopback",
             daemon=True,
         )
         self._thread.start()

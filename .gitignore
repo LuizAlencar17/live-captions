@@ -27,6 +27,7 @@ wheels/
 *.egg
 
 # Virtual environments
+.venv/
 .conda/
 env/
 venv/

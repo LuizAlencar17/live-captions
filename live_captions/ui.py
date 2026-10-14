@@ -400,7 +400,7 @@ class CaptionsWindow(QWidget):
                 border: 1px solid rgba(255, 255, 255, 16);
                 border-radius: 16px;
                 padding: 18px;
-                font-family: "Segoe UI Variable Display", "Segoe UI";
+                font-family: "Sans Serif";
                 font-size: 18px;
                 font-weight: 600;
                 selection-background-color: #6578E8;
